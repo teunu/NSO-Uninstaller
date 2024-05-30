@@ -3,23 +3,44 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+
+
+if (! args.Contains("--no-header"))
+{
+	var assembly = Assembly.GetExecutingAssembly();
+	var version = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
+
+	Console.WriteLine
+	(
+		"Copyright 2024 teunu, CodeLeopard"
+		+ "\nThis program comes with ABSOLUTELY NO WARRANTY"
+		//+ "\nLicense: LGPL-3.0-or-later See: https://www.gnu.org/licenses/" // todo: pick license and add to repo.
+		+ "\nSource code: https://github.com/teunu/NSO-Uninstaller"
+		+ $"\nVersion: {version}"
+	);
+}
 
 bool dryRun = args.Contains("--dry-run");
+bool skipConfirmation = args.Contains("--confirm");
 
-var root = AppDomain.CurrentDomain.BaseDirectory;
-Console.WriteLine($"Current Path: {root}");
+string root = AppDomain.CurrentDomain.BaseDirectory;
 
-if (Confirm("Continue with uninstall?")) {
-	Uninstall();
+Console.WriteLine($"About to uninstall NSO from: {root}");
+if (!skipConfirmation && !Confirm("Continue with uninstall?"))
+{
+	Console.ForegroundColor = ConsoleColor.DarkYellow;
+	Console.WriteLine("NSO was not uninstalled");
+	Console.ResetColor();
 	Finish();
 	return 1;
 }
 
-Console.ForegroundColor = ConsoleColor.DarkYellow;
-Console.WriteLine("NSO was not uninstalled");
-Console.ResetColor();
+
+Uninstall();
 Finish();
 return 0;
+
 
 void Uninstall()
 {
@@ -27,7 +48,7 @@ void Uninstall()
 	// We simply delete all the files mentioned there.
 	// Note: If an update to NSO stops including a file it would be left behind by the uninstaller, so the updater should remove it at update time.
 	var lines = File.ReadAllLines(Path.Combine(root, "rom/nso_mod/files.txt"));
-	foreach(var line in lines)
+	foreach (var line in lines)
 	{
 		if (string.IsNullOrWhiteSpace(line))
 		{
@@ -38,7 +59,7 @@ void Uninstall()
 
 		try
 		{
-			if (! dryRun)
+			if (!dryRun)
 			{
 				File.Delete(finalPath);
 			}
@@ -71,7 +92,8 @@ void Uninstall()
 	int i = 0;
 	while (!Confirm("Verified integrity?"))
 	{
-		if (i > 3) {
+		if (i > 3)
+		{
 			Console.WriteLine("Trusting that the integrity has been verified!");
 			break;
 		}
