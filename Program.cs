@@ -1,16 +1,21 @@
-﻿using System;
+﻿using Pastel;
+using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 internal class Program
 {
-	const string tile_folder = "\\rom\\data\\tiles\\";
-	const string trees = "*instances.xml";
 	static string root;
+
+	static bool dryRun = false;
 
 	//const string test = "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Stormworks";
 
 	static void Main(string[] args)
 	{
+		dryRun = args.Contains("--dry-run");
+
 		Console.WriteLine("Uninstalling NSO!");
 		root = AppDomain.CurrentDomain.BaseDirectory;
 		Console.WriteLine($"Current Path: {root}");
@@ -29,23 +34,41 @@ internal class Program
 
 	public static void Uninstall()
 	{
-		//string[] found_trees = Directory.GetDirectories(root);
-		//Remove trees
-		string[] found_trees = Directory.GetFiles(root + tile_folder, trees);
-
-		Console.ForegroundColor = ConsoleColor.DarkGray;
-		foreach (string tree in found_trees)
+		// The script that generates the installation zip file also creates an inventory of files.
+		// We simply delete all the files mentioned there.
+		// Note: If an update to NSO stops including a file it would be left behind by the uninstaller, so the updater should remove it at update time.
+		var lines = File.ReadAllLines(Path.Combine(root, "rom/nso_mod/files.txt"));
+		foreach(var line in lines)
 		{
-			Console.WriteLine($"... [{tree}]");
-			File.Delete(tree);
-		}
-		Console.ForegroundColor = ConsoleColor.DarkGreen;
+			if (string.IsNullOrWhiteSpace(line))
+			{
+				continue;
+			}
 
-		Console.WriteLine("All trees were removed! Islands are now bald!");
+			var finalPath = Path.Combine(root, line);
+
+			try
+			{
+				if (! dryRun)
+				{
+					File.Delete(finalPath);
+				}
+				Console.WriteLine(finalPath.Pastel(ConsoleColor.Gray));
+			}
+			catch (DirectoryNotFoundException)
+			{
+				// Ignore.
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Failed to delete '{line}'.".Pastel(ConsoleColor.Yellow));
+				Debug.WriteLine(ex.ToString());
+			}
+		}
+
+		Console.WriteLine("NSO related files deleted.".Pastel(ConsoleColor.DarkGreen));
 
 		Console.ResetColor();
-		//Console.WriteLine("End of automation");
-
 		Console.WriteLine("Automatic part finished; Please check file integrity in steam");
 		Console.ForegroundColor = ConsoleColor.DarkYellow;
 		Console.WriteLine("How?");
