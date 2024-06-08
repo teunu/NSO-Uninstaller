@@ -4,12 +4,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Windows.System;
 
 
 if (! args.Contains("--no-header"))
 {
 	var assembly = Assembly.GetExecutingAssembly();
-	var version = FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
+	var version = "alpha.0.2"; //FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
 
 	Console.WriteLine
 	(
@@ -25,6 +26,10 @@ bool dryRun = args.Contains("--dry-run");
 bool skipConfirmation = args.Contains("--confirm");
 
 string root = AppDomain.CurrentDomain.BaseDirectory;
+
+//Temp override
+root = "C:\\Users\\teunu\\Desktop\\Project Repositories\\NSO\\stormworks_nso";
+
 
 Console.WriteLine($"About to uninstall NSO from: {root}");
 if (!skipConfirmation && !Confirm("Continue with uninstall?"))
