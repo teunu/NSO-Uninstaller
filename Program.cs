@@ -50,7 +50,7 @@ void Uninstall()
 	var lines = File.ReadAllLines(Path.Combine(root, "rom/nso_mod/files.txt"));
 	foreach (var line in lines)
 	{
-		if (string.IsNullOrWhiteSpace(line))
+		if (string.IsNullOrWhiteSpace(line) || line.StartsWith('#'))
 		{
 			continue;
 		}
@@ -68,6 +68,10 @@ void Uninstall()
 		catch (DirectoryNotFoundException)
 		{
 			// Ignore.
+		}
+		catch (FileNotFoundException)
+		{
+			// Ignore
 		}
 		catch (Exception ex)
 		{
