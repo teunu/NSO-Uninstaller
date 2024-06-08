@@ -1,9 +1,10 @@
-using Pastel;
+﻿using Pastel;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
+const bool FORCE_VALIDATION = false;
 
 const string ARG_NO_HEADER = "--no-header";
 const string ARG_DRY_RUN = "--dry-run";
@@ -129,6 +130,17 @@ void Uninstall()
 	Console.WriteLine(" > Properties");
 	Console.WriteLine(" > Game Files");
 	Console.WriteLine(" > Verify Game Integrity");
+
+	if (FORCE_VALIDATION)
+	{
+		// If we get too many bug reports from people that didn't verify the files
+		// we should just delete stormworks.exe
+		// that way the user HAS TO verify the game to get it to work again.
+		// And we won't get bug reports for stuff left behind.
+
+		try { File.Delete(Path.Combine(root, "stormworks.exe"));   } catch { }
+		try { File.Delete(Path.Combine(root, "stormworks64.exe")); } catch { }
+	}
 
 	Console.ResetColor();
 
