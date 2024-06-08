@@ -3,14 +3,20 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using Windows.System;
 
 
-if (! args.Contains("--no-header"))
+const string ARG_NO_HEADER = "--no-header";
+const string ARG_DRY_RUN = "--dry-run";
+const string ARG_SKIP_CONFIRM = "--confirm";
+const string ARG_ONLY_STARTUP = "--only-startup";
+
+string root = AppContext.BaseDirectory;
+
+if (! args.Contains(ARG_NO_HEADER))
 {
-	var assembly = Assembly.GetExecutingAssembly();
-	var version = "alpha.0.2"; //FileVersionInfo.GetVersionInfo(assembly.Location).ProductVersion;
+	var name = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+	var file = Path.Combine(root, $"{name}.exe");
+	var version = FileVersionInfo.GetVersionInfo(file).ProductVersion;
 
 	Console.WriteLine
 	(
@@ -22,16 +28,26 @@ if (! args.Contains("--no-header"))
 	);
 }
 
-bool dryRun = args.Contains("--dry-run");
-bool skipConfirmation = args.Contains("--confirm");
 
-string root = AppDomain.CurrentDomain.BaseDirectory;
+bool dryRun = args.Contains(ARG_DRY_RUN);
+bool skipConfirmation = args.Contains(ARG_SKIP_CONFIRM);
 
-//Temp override
-root = "C:\\Users\\teunu\\Desktop\\Project Repositories\\NSO\\stormworks_nso";
 
+if (dryRun)
+	Console.WriteLine($"Arg: {ARG_DRY_RUN} -> Will only list files, not delete them.");
+
+if (skipConfirmation)
+	Console.WriteLine($"Arg: {ARG_SKIP_CONFIRM} -> Skipping prompts for confrmation.");
 
 Console.WriteLine($"About to uninstall NSO from: {root}");
+
+if (args.Contains(ARG_ONLY_STARTUP))
+{
+	// For debugging.
+	Console.WriteLine($"Arg: {ARG_ONLY_STARTUP} -> done.");
+	return 0;
+}
+
 if (!skipConfirmation && !Confirm("Continue with uninstall?"))
 {
 	Console.ForegroundColor = ConsoleColor.DarkYellow;
