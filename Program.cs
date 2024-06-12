@@ -41,7 +41,7 @@ if (dryRun)
 	Console.WriteLine($"Arg: {ARG_DRY_RUN} -> Will only list files, not delete them.");
 
 if (skipConfirmation)
-	Console.WriteLine($"Arg: {ARG_SKIP_CONFIRM} -> Skipping prompts for confrmation.");
+	Console.WriteLine($"Arg: {ARG_SKIP_CONFIRM} -> Skipping prompts for confirmation.");
 
 var stormworksExepath = Path.Combine(root, "stormworks.exe");
 var stormworksExepath64 = Path.Combine(root, "stormworks64.exe");
